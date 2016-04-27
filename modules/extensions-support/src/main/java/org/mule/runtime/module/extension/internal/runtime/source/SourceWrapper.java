@@ -12,10 +12,12 @@ import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNee
 import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessage;
 import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.withAnnotation;
-import org.mule.runtime.core.api.MuleContext;
-import org.mule.runtime.core.api.MuleRuntimeException;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionHandler;
+import org.mule.runtime.core.api.DefaultMuleException;
+import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.MuleException;
+import org.mule.runtime.core.api.MuleRuntimeException;
 import org.mule.runtime.core.api.connector.ConnectionManager;
 import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.construct.FlowConstructAware;
@@ -81,20 +83,31 @@ final class SourceWrapper extends Source implements Lifecycle, FlowConstructAwar
     }
 
     @Override
-    public void start()
+    public void start() throws MuleException
     {
         setConfiguration(sourceContext.getConfigurationInstance());
         setConnection(sourceContext);
 
-        delegate.start();
+        try
+        {
+            delegate.start();
+        }
+        catch (Exception e)
+        {
+            throw new DefaultMuleException(e);
+        }
     }
 
     @Override
-    public void stop()
+    public void stop() throws MuleException
     {
         try
         {
             delegate.stop();
+        }
+        catch (Exception e)
+        {
+            throw new DefaultMuleException(e);
         }
         finally
         {
