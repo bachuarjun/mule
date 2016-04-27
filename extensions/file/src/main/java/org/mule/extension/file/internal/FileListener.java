@@ -6,6 +6,7 @@
  */
 package org.mule.extension.file.internal;
 
+import static java.lang.String.format;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toSet;
@@ -13,6 +14,7 @@ import static org.mule.extension.file.api.ListenerEventType.CREATE;
 import static org.mule.extension.file.api.ListenerEventType.DELETE;
 import static org.mule.extension.file.api.ListenerEventType.UPDATE;
 import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessage;
+import static org.mule.runtime.core.util.concurrent.ThreadNameHelper.getPrefix;
 import org.mule.extension.file.api.FileConnector;
 import org.mule.extension.file.api.FileInputStream;
 import org.mule.extension.file.api.ListenerEventType;
@@ -23,8 +25,11 @@ import org.mule.runtime.core.DefaultMuleMessage;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleRuntimeException;
 import org.mule.runtime.core.api.config.ConfigurationException;
+import org.mule.runtime.core.api.construct.FlowConstruct;
+import org.mule.runtime.core.api.construct.FlowConstructAware;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
+import org.mule.runtime.extension.api.annotation.param.ConfigName;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.UseConfig;
 import org.mule.runtime.extension.api.runtime.source.Source;
@@ -51,7 +56,7 @@ import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
-public class FileListener extends Source<InputStream, ListenerFileAttributes>
+public class FileListener extends Source<InputStream, ListenerFileAttributes> implements FlowConstructAware
 {
 
     @UseConfig
@@ -84,6 +89,11 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes>
     @Inject
     private MuleContext muleContext;
 
+    @ConfigName
+    private String configName;
+
+    private FlowConstruct flowConstruct;
+
     private WatchService watcher;
     private Predicate<FileAttributes> matcher;
     private Set<ListenerEventType> enabledEventTypes = null;
@@ -100,7 +110,7 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes>
         enabledEventTypes = getEnabledEventTypes();
 
         directoryPath.register(watcher, getEnabledEventKinds());
-        executorService = Executors.newSingleThreadExecutor();
+        executorService = Executors.newSingleThreadExecutor(r -> new Thread(format("%s%s.file.listener", getPrefix(muleContext), flowConstruct.getName(), r)));
         executorService.execute(this::listen);
     }
 
@@ -190,7 +200,7 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes>
         }
     }
 
-    private Set<ListenerEventType> getEnabledEventTypes()
+    private Set<ListenerEventType> getEnabledEventTypes() throws ConfigurationException
     {
         if (enabledEventTypes == null)
         {
@@ -204,12 +214,13 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes>
 
         if (enabledEventTypes.isEmpty())
         {
-            throw new ConfigurationException();
+            throw new ConfigurationException(createStaticMessage(format(
+                    "File listener in flow '%s' has disabled all notification types. At least one should be enabled", flowConstruct.getName())));
         }
         return enabledEventTypes;
     }
 
-    private Kind[] getEnabledEventKinds()
+    private Kind[] getEnabledEventKinds() throws ConfigurationException
     {
         Set<Kind> kindSet = getEnabledEventTypes().stream().map(ListenerEventType::asEventKind).collect(toSet());
         Kind[] kinds = new Kind[kindSet.size()];
@@ -222,5 +233,11 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes>
         {
             types.add(supplier.get());
         }
+    }
+
+    @Override
+    public void setFlowConstruct(FlowConstruct flowConstruct)
+    {
+        this.flowConstruct = flowConstruct;
     }
 }
