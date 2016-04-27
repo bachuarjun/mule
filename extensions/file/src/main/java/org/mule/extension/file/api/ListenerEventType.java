@@ -15,6 +15,18 @@ public enum ListenerEventType
 
     private final Kind kind;
 
+    public static ListenerEventType of(Kind kind) {
+        if (kind == ENTRY_CREATE) {
+            return CREATE;
+        } else if (kind == ENTRY_MODIFY) {
+            return UPDATE;
+        } else if (kind == ENTRY_DELETE) {
+            return DELETE;
+        }
+
+        throw new IllegalArgumentException("Invalid Event Kind: " + kind.name());
+    }
+
     ListenerEventType(Kind kind)
     {
         this.kind = kind;
