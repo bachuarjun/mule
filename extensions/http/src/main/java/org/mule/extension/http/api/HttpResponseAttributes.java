@@ -6,10 +6,19 @@
  */
 package org.mule.extension.http.api;
 
+import java.util.Map;
+
 public class HttpResponseAttributes extends HttpAttributes
 {
     private int statusCode;
     private String reasonPhrase;
+
+    public HttpResponseAttributes(int statusCode, String reasonPhrase, Map<String, String> headers)
+    {
+        this.statusCode = statusCode;
+        this.reasonPhrase = reasonPhrase;
+        this.headers = headers;
+    }
 
     public int getStatusCode()
     {

@@ -6,8 +6,14 @@
  */
 package org.mule.extension.http.api;
 
+import java.util.Map;
+
 public class HttpRequestAttributes extends HttpAttributes
 {
+    protected Map<String, String> queryParams;
 
-
+    public HttpRequestAttributes(Map<String, String> queryParams)
+    {
+        this.queryParams = queryParams;
+    }
 }

@@ -6,7 +6,15 @@
  */
 package org.mule.extension.http.api.request.authentication;
 
+import static org.mule.runtime.module.http.internal.request.HttpAuthenticationType.DIGEST;
+import org.mule.runtime.module.http.internal.domain.request.HttpRequestAuthentication;
+
 public class DigestAuthentication extends UsernamePasswordAuthentication
 {
 
+    @Override
+    public HttpRequestAuthentication buildRequestAuthentication()
+    {
+        return getBaseRequestAuthentication(DIGEST);
+    }
 }

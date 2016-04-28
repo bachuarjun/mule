@@ -6,22 +6,15 @@
  */
 package org.mule.extension.http.api;
 
-import org.mule.runtime.module.http.internal.ParameterMap;
-
 import java.io.Serializable;
+import java.util.Map;
 
 public class HttpAttributes implements Serializable
 {
-    private ParameterMap headers;
-    private ParameterMap queryParams;
+    protected Map<String, String> headers;
 
-    public ParameterMap getHeaders()
+    public Map<String, String> getHeaders()
     {
         return headers;
-    }
-
-    public ParameterMap getQueryParams()
-    {
-        return queryParams;
     }
 }

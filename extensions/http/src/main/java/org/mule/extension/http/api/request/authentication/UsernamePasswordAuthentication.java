@@ -6,33 +6,20 @@
  */
 package org.mule.extension.http.api.request.authentication;
 
-import static org.mule.runtime.extension.api.introspection.parameter.ExpressionSupport.NOT_SUPPORTED;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
-import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.Parameter;
-import org.mule.runtime.module.http.api.HttpAuthentication;
+import org.mule.runtime.module.http.internal.domain.request.HttpRequestAuthentication;
 import org.mule.runtime.module.http.internal.domain.request.HttpRequestBuilder;
+import org.mule.runtime.module.http.internal.request.HttpAuthenticationType;
 
-public class UsernamePasswordAuthentication implements HttpAuthentication
+public abstract class UsernamePasswordAuthentication implements HttpAuthentication
 {
     @Parameter
-    @Expression(NOT_SUPPORTED)
     private String username;
 
     @Parameter
-    @Expression(NOT_SUPPORTED)
     private String password;
-
-    public String getUsername()
-    {
-        return username;
-    }
-
-    public String getPassword()
-    {
-        return password;
-    }
 
     @Override
     public void authenticate(MuleEvent muleEvent, HttpRequestBuilder builder) throws MuleException
@@ -44,5 +31,15 @@ public class UsernamePasswordAuthentication implements HttpAuthentication
     public boolean shouldRetry(MuleEvent firstAttemptResponseEvent) throws MuleException
     {
         return false;
+    }
+
+    public abstract HttpRequestAuthentication buildRequestAuthentication();
+
+    protected HttpRequestAuthentication getBaseRequestAuthentication(HttpAuthenticationType authType)
+    {
+        HttpRequestAuthentication requestAuthentication = new HttpRequestAuthentication(authType);
+        requestAuthentication.setUsername(username);
+        requestAuthentication.setPassword(password);
+        return requestAuthentication;
     }
 }

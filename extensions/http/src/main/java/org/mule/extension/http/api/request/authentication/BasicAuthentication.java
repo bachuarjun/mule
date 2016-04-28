@@ -6,20 +6,22 @@
  */
 package org.mule.extension.http.api.request.authentication;
 
-import static org.mule.runtime.extension.api.introspection.parameter.ExpressionSupport.NOT_SUPPORTED;
-import org.mule.runtime.extension.api.annotation.Expression;
+import static org.mule.runtime.module.http.internal.request.HttpAuthenticationType.BASIC;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
+import org.mule.runtime.module.http.internal.domain.request.HttpRequestAuthentication;
 
 public class BasicAuthentication extends UsernamePasswordAuthentication
 {
     @Parameter
     @Optional(defaultValue = "true")
-    @Expression(NOT_SUPPORTED)
     private boolean preemptive;
 
-    public boolean isPreemptive()
+    @Override
+    public HttpRequestAuthentication buildRequestAuthentication()
     {
-        return preemptive;
+        HttpRequestAuthentication requestAuthentication = getBaseRequestAuthentication(BASIC);
+        requestAuthentication.setPreemptive(preemptive);
+        return requestAuthentication;
     }
 }

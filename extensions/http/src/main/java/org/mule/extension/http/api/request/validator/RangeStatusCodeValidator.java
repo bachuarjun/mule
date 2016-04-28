@@ -7,7 +7,6 @@
 package org.mule.extension.http.api.request.validator;
 
 import org.mule.runtime.extension.api.annotation.Parameter;
-import org.mule.runtime.module.http.internal.request.ResponseValidator;
 
 public abstract class RangeStatusCodeValidator implements ResponseValidator
 {

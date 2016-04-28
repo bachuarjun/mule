@@ -6,21 +6,19 @@
  */
 package org.mule.extension.http.api.request.authentication;
 
-import static org.mule.runtime.extension.api.introspection.parameter.ExpressionSupport.NOT_SUPPORTED;
-import org.mule.runtime.extension.api.annotation.Expression;
+import static org.mule.runtime.module.http.internal.request.HttpAuthenticationType.NTLM;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
+import org.mule.runtime.module.http.internal.domain.request.HttpRequestAuthentication;
 
 public class NtlmAuthentication extends UsernamePasswordAuthentication
 {
     @Parameter
     @Optional
-    @Expression(NOT_SUPPORTED)
     private String domain;
 
     @Parameter
     @Optional
-    @Expression(NOT_SUPPORTED)
     private String workstation;
 
     public String getDomain()
@@ -31,5 +29,14 @@ public class NtlmAuthentication extends UsernamePasswordAuthentication
     public String getWorkstation()
     {
         return workstation;
+    }
+
+    @Override
+    public HttpRequestAuthentication buildRequestAuthentication()
+    {
+        HttpRequestAuthentication requestAuthentication = getBaseRequestAuthentication(NTLM);
+        requestAuthentication.setDomain(domain);
+        requestAuthentication.setWorkstation(workstation);
+        return requestAuthentication;
     }
 }

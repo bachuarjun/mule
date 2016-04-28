@@ -277,21 +277,6 @@ public class GrizzlyHttpClient implements HttpClient
         }
     }
 
-    @Override
-    public void send(HttpRequest request, int responseTimeout, boolean followRedirects, HttpRequestAuthentication
-            authentication, final CompletionHandler<HttpResponse, Exception> completionHandler, WorkManager workManager)
-    {
-        try
-        {
-            asyncHttpClient.executeRequest(createGrizzlyRequest(request, responseTimeout, followRedirects, authentication),
-                                           new WorkManagerSourceAsyncCompletionHandler(completionHandler, workManager));
-        }
-        catch (Exception e)
-        {
-            completionHandler.onFailure(e);
-        }
-    }
-
     private class WorkManagerSourceAsyncCompletionHandler extends AsyncCompletionHandler<Response> implements WorkManagerSource
     {
 

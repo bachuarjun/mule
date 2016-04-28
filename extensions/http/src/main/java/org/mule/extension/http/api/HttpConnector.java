@@ -13,7 +13,7 @@ import org.mule.extension.http.api.request.authentication.BasicAuthentication;
 import org.mule.extension.http.api.request.authentication.DigestAuthentication;
 import org.mule.extension.http.api.request.authentication.NtlmAuthentication;
 import org.mule.extension.http.api.request.validator.FailureStatusCodeValidator;
-import org.mule.extension.http.api.request.validator.RangeStatusCodeValidator;
+import org.mule.extension.http.api.request.validator.ResponseValidator;
 import org.mule.extension.http.api.request.validator.SuccessStatusCodeValidator;
 import org.mule.module.socket.api.SocketsExtension;
 import org.mule.runtime.extension.api.annotation.Configurations;
@@ -31,7 +31,7 @@ import org.mule.runtime.module.socket.api.TcpClientSocketProperties;
 @Operations({SimpleHttpOperations.class})
 @SubTypeMapping(baseType = HttpAuthentication.class, subTypes = {BasicAuthentication.class, DigestAuthentication.class, NtlmAuthentication.class})
 @SubTypeMapping(baseType = ProxyConfig.class, subTypes = {DefaultProxyConfig.class, NtlmProxyConfig.class})
-@SubTypeMapping(baseType = RangeStatusCodeValidator.class, subTypes = {SuccessStatusCodeValidator.class, FailureStatusCodeValidator.class})
+@SubTypeMapping(baseType = ResponseValidator.class, subTypes = {SuccessStatusCodeValidator.class, FailureStatusCodeValidator.class})
 @Import(type = TcpClientSocketProperties.class, from = SocketsExtension.class)
 public class HttpConnector
 {
