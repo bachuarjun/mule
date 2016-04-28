@@ -47,14 +47,14 @@ public class StandardFileSystemOperations
      * @return a {@link TreeNode} object representing the listed directory
      * @throws IllegalArgumentException if {@code directoryPath} points to a file which doesn't exists or is not a directory
      */
-    public TreeNode list(@Connection FileSystem fileSystem,
-                         @Optional String directoryPath,
-                         @Optional(defaultValue = "false") boolean recursive,
-                         MuleMessage<?, ?> message,
-                         @Optional FilePredicateBuilder matcher)
-    {
-        return fileSystem.list(directoryPath, recursive, message, getPredicate(matcher));
-    }
+    //public TreeNode list(@Connection FileSystem fileSystem,
+    //                     @Optional String directoryPath,
+    //                     @Optional(defaultValue = "false") boolean recursive,
+    //                     MuleMessage<?, ?> message,
+    //                     @Optional FilePredicateBuilder matcher)
+    //{
+    //    return fileSystem.list(directoryPath, recursive, message, getPredicate(matcher));
+    //}
 
     /**
      * Obtains the content and metadata of a file at a given path. The operation itself

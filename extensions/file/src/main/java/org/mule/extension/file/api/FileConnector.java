@@ -8,7 +8,7 @@ package org.mule.extension.file.api;
 
 import static java.lang.String.format;
 import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessage;
-import org.mule.extension.file.internal.FileListener;
+import org.mule.extension.file.internal.DirectoryListener;
 import org.mule.extension.file.internal.LocalFilePredicateBuilder;
 import org.mule.runtime.core.api.lifecycle.Initialisable;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
@@ -40,7 +40,7 @@ import java.nio.file.Paths;
 @Operations({StandardFileSystemOperations.class})
 @Providers(LocalFileConnectionProvider.class)
 @SubTypeMapping(baseType = FilePredicateBuilder.class, subTypes = LocalFilePredicateBuilder.class)
-@Sources(FileListener.class)
+@Sources(DirectoryListener.class)
 public class FileConnector implements Initialisable, FileConnectorConfig
 {
 

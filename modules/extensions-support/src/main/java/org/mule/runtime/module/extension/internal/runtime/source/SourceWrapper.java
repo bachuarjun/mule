@@ -79,6 +79,10 @@ final class SourceWrapper extends Source implements Lifecycle, FlowConstructAwar
     @Override
     public void initialise() throws InitialisationException
     {
+        if (delegate instanceof FlowConstructAware)
+        {
+            ((FlowConstructAware) delegate).setFlowConstruct(flowConstruct);
+        }
         initialiseIfNeeded(delegate, true, muleContext);
     }
 
