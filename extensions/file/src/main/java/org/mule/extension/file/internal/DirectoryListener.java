@@ -14,14 +14,15 @@ import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toSet;
-import static org.mule.extension.file.api.ListenerEventType.CREATE;
-import static org.mule.extension.file.api.ListenerEventType.DELETE;
-import static org.mule.extension.file.api.ListenerEventType.UPDATE;
+import static org.mule.extension.file.api.FileEventType.CREATE;
+import static org.mule.extension.file.api.FileEventType.DELETE;
+import static org.mule.extension.file.api.FileEventType.UPDATE;
 import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessage;
 import static org.mule.runtime.core.util.concurrent.ThreadNameHelper.getPrefix;
+import org.mule.extension.file.api.DeletedFileAttributes;
 import org.mule.extension.file.api.FileConnector;
 import org.mule.extension.file.api.FileInputStream;
-import org.mule.extension.file.api.ListenerEventType;
+import org.mule.extension.file.api.FileEventType;
 import org.mule.extension.file.api.ListenerFileAttributes;
 import org.mule.runtime.api.message.NullPayload;
 import org.mule.runtime.api.metadata.DataType;
@@ -119,7 +120,7 @@ public class DirectoryListener extends Source<InputStream, ListenerFileAttribute
     private FlowConstruct flowConstruct;
     private WatchService watcher;
     private Predicate<FileAttributes> matcher;
-    private Set<ListenerEventType> enabledEventTypes = new HashSet<>();
+    private Set<FileEventType> enabledEventTypes = new HashSet<>();
     private ExecutorService executorService;
 
     private final Map<WatchKey, Path> keyPaths = new HashMap<>();
@@ -184,13 +185,13 @@ public class DirectoryListener extends Source<InputStream, ListenerFileAttribute
             return;
         }
 
-        ListenerFileAttributes attributes = new ListenerFileAttributes(path, ListenerEventType.of(kind));
+        ListenerFileAttributes attributes = new ListenerFileAttributes(path, FileEventType.of(kind));
         if (!matcher.test(attributes))
         {
             if (LOGGER.isDebugEnabled())
             {
                 LOGGER.debug(format("Detected a '%s' event on path '%s' but it will be skipped because it does not meet the matcher's criteria",
-                                    ListenerEventType.of(kind), path.toString()));
+                                    FileEventType.of(kind), path.toString()));
             }
             return;
         }
@@ -211,18 +212,21 @@ public class DirectoryListener extends Source<InputStream, ListenerFileAttribute
 
     private MuleMessage<InputStream, ListenerFileAttributes> createMessage(Path path, ListenerFileAttributes attributes)
     {
+        Object payload = NullPayload.getInstance();
+        DataType dataType = DataTypeFactory.create(NullPayload.class);
         MuleMessage<InputStream, ListenerFileAttributes> message;
 
-        if (attributes.isDirectory())
+        if (attributes.getEventType() == FileEventType.DELETE)
         {
-            message = (MuleMessage) new DefaultMuleMessage(NullPayload.getInstance(), DataTypeFactory.create(NullPayload.class), attributes, muleContext);
+            attributes = new DeletedFileAttributes(path);
         }
-        else
+        else if (!attributes.isDirectory())
         {
-            DataType dataType = fileSystem.getFileMessageDataType(DataTypeFactory.create(InputStream.class), attributes);
-            message = (MuleMessage) new DefaultMuleMessage(new FileInputStream(path, new NullPathLock()), dataType, attributes, muleContext);
+            dataType = fileSystem.getFileMessageDataType(DataTypeFactory.create(InputStream.class), attributes);
+            payload = new FileInputStream(path, new NullPathLock());
         }
 
+        message = (MuleMessage) new DefaultMuleMessage(payload, dataType, attributes, muleContext);
         return message;
     }
 
@@ -346,7 +350,7 @@ public class DirectoryListener extends Source<InputStream, ListenerFileAttribute
 
     private void calculateEnabledEventTypes() throws ConfigurationException
     {
-        ImmutableSet.Builder<ListenerEventType> types = ImmutableSet.builder();
+        ImmutableSet.Builder<FileEventType> types = ImmutableSet.builder();
         addEventType(types, notifyOnCreate, () -> CREATE);
         addEventType(types, notifyOnUpdate, () -> UPDATE);
         addEventType(types, notifyOnDelete, () -> DELETE);
@@ -362,12 +366,12 @@ public class DirectoryListener extends Source<InputStream, ListenerFileAttribute
 
     private Kind<?>[] getEnabledEventKinds()
     {
-        Set<Kind> kindSet = enabledEventTypes.stream().map(ListenerEventType::asEventKind).collect(toSet());
+        Set<Kind> kindSet = enabledEventTypes.stream().map(FileEventType::asEventKind).collect(toSet());
         Kind[] kinds = new Kind[kindSet.size()];
         return kindSet.toArray(kinds);
     }
 
-    private void addEventType(ImmutableSet.Builder<ListenerEventType> types, boolean condition, Supplier<ListenerEventType> supplier)
+    private void addEventType(ImmutableSet.Builder<FileEventType> types, boolean condition, Supplier<FileEventType> supplier)
     {
         if (condition)
         {

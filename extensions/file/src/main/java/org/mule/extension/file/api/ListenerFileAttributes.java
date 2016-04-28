@@ -8,17 +8,18 @@ package org.mule.extension.file.api;
 
 import java.nio.file.Path;
 
-public class ListenerFileAttributes extends LocalFileAttributes
+public class ListenerFileAttributes extends LocalFileAttributes implements EventedFileAttributes
 {
-    private final ListenerEventType eventType;
+    private final FileEventType eventType;
 
-    public ListenerFileAttributes(Path path, ListenerEventType eventType)
+    public ListenerFileAttributes(Path path, FileEventType eventType)
     {
         super(path);
         this.eventType = eventType;
     }
 
-    public ListenerEventType getEventType()
+    @Override
+    public FileEventType getEventType()
     {
         return eventType;
     }

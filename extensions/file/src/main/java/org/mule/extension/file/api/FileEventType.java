@@ -12,7 +12,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 import java.nio.file.WatchEvent.Kind;
 
-public enum ListenerEventType
+public enum FileEventType
 {
 
     CREATE(ENTRY_CREATE),
@@ -21,7 +21,7 @@ public enum ListenerEventType
 
     private final Kind kind;
 
-    public static ListenerEventType of(Kind kind) {
+    public static FileEventType of(Kind kind) {
         if (kind == ENTRY_CREATE) {
             return CREATE;
         } else if (kind == ENTRY_MODIFY) {
@@ -33,7 +33,7 @@ public enum ListenerEventType
         throw new IllegalArgumentException("Invalid Event Kind: " + kind.name());
     }
 
-    ListenerEventType(Kind kind)
+    FileEventType(Kind kind)
     {
         this.kind = kind;
     }
