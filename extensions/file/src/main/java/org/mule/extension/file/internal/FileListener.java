@@ -19,7 +19,6 @@ import org.mule.extension.file.api.FileConnector;
 import org.mule.extension.file.api.FileInputStream;
 import org.mule.extension.file.api.ListenerEventType;
 import org.mule.extension.file.api.ListenerFileAttributes;
-import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.temporary.MuleMessage;
 import org.mule.runtime.core.DefaultMuleMessage;
 import org.mule.runtime.core.api.MuleContext;
@@ -29,19 +28,22 @@ import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.construct.FlowConstructAware;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
-import org.mule.runtime.extension.api.annotation.param.ConfigName;
+import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.UseConfig;
 import org.mule.runtime.extension.api.runtime.source.Source;
 import org.mule.runtime.module.extension.file.api.FileAttributes;
 import org.mule.runtime.module.extension.file.api.FilePredicateBuilder;
+import org.mule.runtime.module.extension.file.api.FileSystem;
 import org.mule.runtime.module.extension.file.api.lock.NullPathLock;
 import org.mule.runtime.module.extension.file.api.matcher.NullFilePayloadPredicate;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,8 +91,8 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes> im
     @Inject
     private MuleContext muleContext;
 
-    @ConfigName
-    private String configName;
+    @Connection
+    private FileSystem fileSystem;
 
     private FlowConstruct flowConstruct;
 
@@ -102,66 +104,69 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes> im
     @Override
     public void start() throws Exception
     {
-        createWatcherService();
-
-        //TODO resolve properly
-        Path directoryPath = Paths.get(directory);
         matcher = predicateBuilder != null ? predicateBuilder.build() : new NullFilePayloadPredicate();
         enabledEventTypes = getEnabledEventTypes();
 
-        directoryPath.register(watcher, getEnabledEventKinds());
+        createWatcherService();
+
         executorService = Executors.newSingleThreadExecutor(r -> new Thread(format("%s%s.file.listener", getPrefix(muleContext), flowConstruct.getName(), r)));
         executorService.execute(this::listen);
     }
 
     private void listen()
     {
-        for (; ; )
+        try
         {
-            WatchKey key;
-            try
+            for (; ; )
             {
-                key = watcher.take();
-            }
-            catch (InterruptedException e)
-            {
-                stop();
-                return;
-            }
-
-            try
-            {
-                for (WatchEvent<?> event : key.pollEvents())
+                WatchKey key;
+                try
                 {
-                    Kind<?> kind = event.kind();
+                    key = watcher.take();
+                }
+                catch (InterruptedException | ClosedWatchServiceException e)
+                {
+                    return;
+                }
 
-                    if (kind == OVERFLOW)
+                try
+                {
+                    for (WatchEvent<?> event : key.pollEvents())
+                    {
+                        Kind<?> kind = event.kind();
+
+                        if (kind == OVERFLOW)
+                        {
+                            //log
+                            continue;
+                        }
+
+                        WatchEvent<Path> ev = (WatchEvent<Path>) event;
+                        Path path = ev.context();
+
+                        ListenerFileAttributes attributes = new ListenerFileAttributes(path, ListenerEventType.of(kind));
+                        if (!matcher.test(attributes))
+                        {
+                            //log
+                            continue;
+                        }
+
+                        sourceContext.getMessageHandler().handle(createMessage(path, attributes));
+                    }
+                }
+                finally
+                {
+                    if (!key.reset())
                     {
                         //log
-                        continue;
+                        watcher.close();
                     }
-
-                    WatchEvent<Path> ev = (WatchEvent<Path>) event;
-                    Path path = ev.context();
-
-                    ListenerFileAttributes attributes = new ListenerFileAttributes(path, ListenerEventType.of(kind));
-                    if (!matcher.test(attributes))
-                    {
-                        //log
-                        continue;
-                    }
-
-                    sourceContext.getMessageHandler().handle(createMessage(path, attributes));
                 }
             }
-            finally
-            {
-                if (!key.reset())
-                {
-                    //log
-                    sourceContext.getExceptionCallback().onException(new ConnectionException("fuck!"));
-                }
-            }
+        }
+        catch (Exception e)
+        {
+            sourceContext.getExceptionCallback().onException(e);
         }
     }
 
@@ -188,7 +193,7 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes> im
         }
     }
 
-    private void createWatcherService()
+    private void createWatcherService() throws IOException
     {
         try
         {
@@ -198,6 +203,9 @@ public class FileListener extends Source<InputStream, ListenerFileAttributes> im
         {
             throw new MuleRuntimeException(createStaticMessage("Could not create watcher service"), e);
         }
+
+        MuleMessage<InputStream, FileAttributes> subject = fileSystem.read(new DefaultMuleMessage(""), directory, false);
+        Paths.get(subject.getAttributes().getPath()).register(watcher);
     }
 
     private Set<ListenerEventType> getEnabledEventTypes() throws ConfigurationException
