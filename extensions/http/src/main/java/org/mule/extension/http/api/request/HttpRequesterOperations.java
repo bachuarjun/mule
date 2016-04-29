@@ -6,6 +6,7 @@
  */
 package org.mule.extension.http.api.request;
 
+import static java.lang.Integer.MAX_VALUE;
 import org.mule.extension.http.api.HttpConnector;
 import org.mule.extension.http.api.HttpResponseAttributes;
 import org.mule.extension.http.api.HttpSendBodyMode;
@@ -42,6 +43,7 @@ public class HttpRequesterOperations
     private static final Logger logger = LoggerFactory.getLogger(HttpRequesterOperations.class);
 
     static final String REMOTELY_CLOSED = "Remotely closed";
+    private static final int WAIT_FOR_EVER = MAX_VALUE;
 
     /**
      * Consumes an HTTP service.
@@ -100,18 +102,15 @@ public class HttpRequesterOperations
 
         if (requestStreamingMode == null)
         {
-            requestStreamingMode = config.getRequestStreamingMode().apply(muleEvent);
+            requestStreamingMode = HttpStreamingType.AUTO; //config.getRequestStreamingMode().apply(muleEvent);
         }
 
         if (sendBodyMode == null)
         {
-            sendBodyMode = config.getSendBodyMode().apply(muleEvent);
+            sendBodyMode = HttpSendBodyMode.AUTO; //config.getSendBodyMode().apply(muleEvent);
         }
 
-        if (responseTimeout == null)
-        {
-            responseTimeout = config.getResponseTimeout().apply(muleEvent);
-        }
+        responseTimeout = resolveResponseTimeout(muleEvent, config, responseTimeout);
 
         if (responseValidator == null)
         {
@@ -158,7 +157,7 @@ public class HttpRequesterOperations
         //    validateResponse(muleEvent);
         //}
         //return muleEvent;
-
+        responseValidator.validate(muleMessage);
         return muleMessage;
     }
 
@@ -168,6 +167,27 @@ public class HttpRequesterOperations
         String resolvedPath = HttpParser.encodeSpaces(path);
 
         return String.format("%s://%s:%s%s", scheme, host, port, resolvedPath);
+    }
+
+    private int resolveResponseTimeout(MuleEvent muleEvent, HttpRequesterConfig config, Integer responseTimeout)
+    {
+        if (responseTimeout == null && config.getResponseTimeout() != null)
+        {
+            responseTimeout = config.getResponseTimeout().apply(muleEvent);
+        }
+
+        if (muleEvent.getMuleContext().getConfiguration().isDisableTimeouts())
+        {
+            return WAIT_FOR_EVER;
+        }
+        else if (responseTimeout == null)
+        {
+            return muleEvent.getTimeout();
+        }
+        else
+        {
+            return responseTimeout;
+        }
     }
 
     private HttpRequestAuthentication resolveAuthentication(HttpAuthentication authentication)

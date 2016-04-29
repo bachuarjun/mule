@@ -11,6 +11,7 @@ import static org.mule.runtime.module.http.api.HttpHeaders.Names.CONNECTION;
 import static org.mule.runtime.module.http.api.HttpHeaders.Values.CLOSE;
 import org.mule.extension.http.api.request.client.HttpClient;
 import org.mule.extension.http.api.request.proxy.ProxyConfig;
+import org.mule.extension.http.internal.request.DefaultHttpRequest;
 import org.mule.extension.http.internal.request.client.HttpClientConfiguration;
 import org.mule.module.socket.api.TcpClientSocketProperties;
 import org.mule.runtime.api.execution.CompletionHandler;
@@ -26,7 +27,6 @@ import org.mule.runtime.core.util.StringUtils;
 import org.mule.runtime.module.http.internal.domain.ByteArrayHttpEntity;
 import org.mule.runtime.module.http.internal.domain.InputStreamHttpEntity;
 import org.mule.runtime.module.http.internal.domain.MultipartHttpEntity;
-import org.mule.runtime.module.http.internal.domain.request.DefaultHttpRequest;
 import org.mule.runtime.module.http.internal.domain.request.HttpRequest;
 import org.mule.runtime.module.http.internal.domain.request.HttpRequestAuthentication;
 import org.mule.runtime.module.http.internal.domain.response.HttpResponse;
@@ -345,10 +345,7 @@ public class GrizzlyHttpClient implements HttpClient
 
         for (String queryParamName : defaultHttpRequest.getQueryParams().keySet())
         {
-            for (String queryParamValue : defaultHttpRequest.getQueryParams().getAll(queryParamName))
-            {
-                builder.addQueryParam(queryParamName, queryParamValue);
-            }
+            builder.addQueryParam(queryParamName, defaultHttpRequest.getQueryParams().get(queryParamName));
         }
 
         if (authentication != null)

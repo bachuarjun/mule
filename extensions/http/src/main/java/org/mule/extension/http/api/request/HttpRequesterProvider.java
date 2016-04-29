@@ -19,7 +19,6 @@ import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleException;
-import org.mule.runtime.core.api.context.MuleContextAware;
 import org.mule.runtime.core.api.lifecycle.Initialisable;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
 import org.mule.runtime.core.config.i18n.CoreMessages;
@@ -30,7 +29,7 @@ import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
 @Alias("requester")
-public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterConfig, HttpClient>, MuleContextAware, Initialisable
+public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterConfig, HttpClient>, Initialisable
 {
     private static final int UNLIMITED_CONNECTIONS = -1;
     private static final String THREAD_NAME_PREFIX_PATTERN = "%shttp.requester.%s";
@@ -49,7 +48,7 @@ public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterCo
      * By default the number of connections is unlimited.
      */
     @Parameter
-    @Optional(defaultValue = "0")
+    @Optional(defaultValue = "-1")
     @Expression(NOT_SUPPORTED)
     private Integer maxConnections;
 
@@ -80,7 +79,7 @@ public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterCo
     @Override
     public HttpClient connect(HttpRequesterConfig httpRequesterConfig) throws ConnectionException
     {
-        String threadNamePrefix = String.format(THREAD_NAME_PREFIX_PATTERN, ThreadNameHelper.getPrefix(muleContext), httpRequesterConfig.getName());
+        String threadNamePrefix = String.format(THREAD_NAME_PREFIX_PATTERN, ThreadNameHelper.getPrefix(httpRequesterConfig.getMuleContext()), httpRequesterConfig.getName());
 
         HttpClientConfiguration configuration = new HttpClientConfiguration.Builder()
             .setTlsContextFactory(httpRequesterConfig.getTlsContextFactory())
@@ -123,19 +122,13 @@ public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterCo
     @Override
     public ConnectionValidationResult validate(HttpClient httpClient)
     {
-        return null;
+        return ConnectionValidationResult.success();
     }
 
     @Override
     public ConnectionHandlingStrategy<HttpClient> getHandlingStrategy(ConnectionHandlingStrategyFactory<HttpRequesterConfig, HttpClient> connectionHandlingStrategyFactory)
     {
-        return null;
-    }
-
-    @Override
-    public void setMuleContext(MuleContext context)
-    {
-        this.muleContext = context;
+        return connectionHandlingStrategyFactory.cached();
     }
 
     @Override

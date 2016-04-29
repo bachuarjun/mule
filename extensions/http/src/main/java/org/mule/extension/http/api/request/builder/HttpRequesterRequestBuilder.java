@@ -6,20 +6,27 @@
  */
 package org.mule.extension.http.api.request.builder;
 
+import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
+import org.mule.runtime.extension.api.annotation.param.Optional;
 
+import java.util.HashMap;
 import java.util.Map;
 
+@Alias("request-builder")
 public class HttpRequesterRequestBuilder
 {
     @Parameter
-    private Map<String, String> queryParams;
+    @Optional
+    private Map<String, String> queryParams = new HashMap<>();
 
     @Parameter
-    private Map<String, String> uriParams;
+    @Optional
+    private Map<String, String> uriParams = new HashMap<>();
 
     @Parameter
-    private Map<String, String> headers;
+    @Optional
+    private Map<String, String> headers = new HashMap<>();
 
     //TODO: Analyse support of several definitions
     public String replaceUriParams(String path)

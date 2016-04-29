@@ -14,10 +14,14 @@ import org.mule.extension.http.api.HttpStreamingType;
 import org.mule.extension.http.api.request.authentication.HttpAuthentication;
 import org.mule.runtime.api.tls.TlsContextFactory;
 import org.mule.runtime.api.tls.TlsContextFactoryBuilder;
+import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
+import org.mule.runtime.core.api.MuleException;
+import org.mule.runtime.core.api.context.MuleContextAware;
 import org.mule.runtime.core.api.lifecycle.Initialisable;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
 import org.mule.runtime.core.api.lifecycle.LifecycleUtils;
+import org.mule.runtime.core.api.lifecycle.Stoppable;
 import org.mule.runtime.core.config.i18n.CoreMessages;
 import org.mule.runtime.extension.api.annotation.Configuration;
 import org.mule.runtime.extension.api.annotation.Expression;
@@ -37,7 +41,7 @@ import javax.inject.Inject;
 @Configuration(name = "requester-config")
 @Providers(HttpRequesterProvider.class)
 @Operations({HttpRequesterOperations.class})
-public class HttpRequesterConfig implements Initialisable
+public class HttpRequesterConfig implements Initialisable, Stoppable, MuleContextAware
 {
     @ConfigName
     private String configName;
@@ -80,7 +84,7 @@ public class HttpRequesterConfig implements Initialisable
      * Base path to use for all requests that reference this config.
      */
     @Parameter
-    @Optional
+    @Optional(defaultValue = "/")
     private Function<MuleEvent, String> basePath;
 
     /**
@@ -146,6 +150,8 @@ public class HttpRequesterConfig implements Initialisable
     private TlsContextFactoryBuilder defaultTlsContextFactoryBuilder;
 
     private CookieManager cookieManager;
+    private MuleContext muleContext;
+    private boolean stopped = false;
 
     public String getName()
     {
@@ -155,7 +161,6 @@ public class HttpRequesterConfig implements Initialisable
     @Override
     public void initialise() throws InitialisationException
     {
-
         if (port == null)
         {
             port = muleEvent -> protocol.getDefaultPort();
@@ -250,5 +255,31 @@ public class HttpRequesterConfig implements Initialisable
     public CookieManager getCookieManager()
     {
         return cookieManager;
+    }
+
+    public MuleContext getMuleContext()
+    {
+        return muleContext;
+    }
+
+    @Override
+    public void setMuleContext(MuleContext context)
+    {
+        this.muleContext = context;
+    }
+
+    @Override
+    public void stop() throws MuleException
+    {
+        if (this.authentication instanceof Stoppable)
+        {
+            ((Stoppable) this.authentication).stop();
+        }
+        stopped = true;
+    }
+
+    public boolean isStopped()
+    {
+        return stopped;
     }
 }

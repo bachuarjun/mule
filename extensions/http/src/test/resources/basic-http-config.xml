@@ -7,10 +7,18 @@
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
       http://www.mulesoft.org/schema/mule/httpn http://www.mulesoft.org/schema/mule/httpn/current/mule-httpn.xsd">
     
-    <httpn:requester-config name="reqConfig" host="localhost" protocol="HTTP" port="${clientPort}"/>
+    <httpn:requester-config name="reqConfig" host="localhost" protocol="HTTP" port="${clientPort}">
+        <httpn:requester-connection/>
+    </httpn:requester-config>
     
     <flow name="client">
-        <httpn:request path="/" config-ref="reqConfig"/>
+        <httpn:request path="/" config-ref="reqConfig">
+            <httpn:request-builder>
+                <httpn:query-params>
+                    <httpn:query-param key="query" value="#['param']" />
+                </httpn:query-params>
+            </httpn:request-builder>
+        </httpn:request>
     </flow>
 
     <!--<flow name="server">-->
