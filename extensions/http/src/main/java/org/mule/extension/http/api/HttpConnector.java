@@ -6,7 +6,6 @@
  */
 package org.mule.extension.http.api;
 
-import org.mule.extension.api.annotation.Import;
 import org.mule.extension.http.api.listener.HttpListenerConfig;
 import org.mule.extension.http.api.request.HttpRequesterConfig;
 import org.mule.extension.http.api.request.authentication.BasicAuthentication;
@@ -18,8 +17,10 @@ import org.mule.extension.http.api.request.validator.SuccessStatusCodeValidator;
 import org.mule.module.socket.api.SocketsExtension;
 import org.mule.runtime.extension.api.annotation.Configurations;
 import org.mule.runtime.extension.api.annotation.Extension;
+import org.mule.runtime.extension.api.annotation.Import;
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.SubTypeMapping;
+import org.mule.runtime.extension.api.annotation.capability.Xml;
 import org.mule.runtime.module.http.api.HttpAuthentication;
 import org.mule.runtime.module.http.api.requester.proxy.ProxyConfig;
 import org.mule.runtime.module.http.internal.request.DefaultProxyConfig;
@@ -33,6 +34,7 @@ import org.mule.runtime.module.socket.api.TcpClientSocketProperties;
 @SubTypeMapping(baseType = ProxyConfig.class, subTypes = {DefaultProxyConfig.class, NtlmProxyConfig.class})
 @SubTypeMapping(baseType = ResponseValidator.class, subTypes = {SuccessStatusCodeValidator.class, FailureStatusCodeValidator.class})
 @Import(type = TcpClientSocketProperties.class, from = SocketsExtension.class)
+@Xml(namespaceLocation = "http://www.mulesoft.org/schema/mule/httpn", namespace = "httpn")
 public class HttpConnector
 {
 

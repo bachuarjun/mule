@@ -61,7 +61,7 @@ public class HttpListenerProvider implements ConnectionProvider<HttpListenerConf
     @Parameter
     @Optional(defaultValue = "30000")
     @Expression(NOT_SUPPORTED)
-    private int connectionIdleTimeout;
+    private Integer connectionIdleTimeout;
 
     /**
      * If false, each connection will be closed after the first request is completed.
@@ -69,7 +69,7 @@ public class HttpListenerProvider implements ConnectionProvider<HttpListenerConf
     @Parameter
     @Optional(defaultValue = "true")
     @Expression(NOT_SUPPORTED)
-    private boolean usePersistentConnections;
+    private Boolean usePersistentConnections;
 
     @Override
     public Server connect(HttpListenerConfig httpListenerConfig) throws ConnectionException

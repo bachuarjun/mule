@@ -49,9 +49,9 @@ public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterCo
      * By default the number of connections is unlimited.
      */
     @Parameter
-    @Optional(defaultValue = "-1")
+    @Optional(defaultValue = "0")
     @Expression(NOT_SUPPORTED)
-    private int maxConnections;
+    private Integer maxConnections;
 
     /**
      * The number of milliseconds that a connection can remain idle before it is closed.
@@ -60,7 +60,7 @@ public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterCo
     @Parameter
     @Optional(defaultValue = "30000")
     @Expression(NOT_SUPPORTED)
-    private int connectionIdleTimeout;
+    private Integer connectionIdleTimeout;
 
     /**
      * If false, each connection will be closed after the first request is completed.
@@ -68,7 +68,7 @@ public class HttpRequesterProvider implements ConnectionProvider<HttpRequesterCo
     @Parameter
     @Optional(defaultValue = "true")
     @Expression(NOT_SUPPORTED)
-    private boolean usePersistentConnections;
+    private Boolean usePersistentConnections;
 
     @Parameter
     @Optional

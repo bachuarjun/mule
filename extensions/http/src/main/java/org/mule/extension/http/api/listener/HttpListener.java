@@ -8,6 +8,7 @@ package org.mule.extension.http.api.listener;
 
 import static org.mule.runtime.extension.api.introspection.parameter.ExpressionSupport.NOT_SUPPORTED;
 import org.mule.extension.http.api.HttpRequestAttributes;
+import org.mule.extension.http.api.HttpStreamingType;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.Parameter;
@@ -15,7 +16,6 @@ import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.UseConfig;
 import org.mule.runtime.extension.api.runtime.source.Source;
-import org.mule.runtime.module.http.api.requester.HttpStreamingType;
 import org.mule.runtime.module.http.internal.listener.Server;
 
 @Alias("listener")
@@ -58,7 +58,7 @@ public class HttpListener extends Source<Object, HttpRequestAttributes>
     @Parameter
     @Optional(defaultValue = "true")
     @Expression(NOT_SUPPORTED)
-    private HttpStreamingType parseRequest;
+    private Boolean parseRequest;
 
     //TODO: Add response and error-response builders
 
