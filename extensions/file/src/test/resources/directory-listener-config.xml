@@ -8,22 +8,19 @@
     <file:config name="file" baseDir="${baseDir}"/>
 
     <flow name="listenWithoutMatcher">
-        <file:directory-listener directory="listener" recursive="true"/>
+        <file:directory-listener directory="matcherless" recursive="true" />
         <flow-ref name="onEvent"/>
     </flow>
 
-    <!--<flow name="listWithEmbeddedPredicate">-->
-    <!--<file:list directoryPath="#[path]" recursive="#[recursive]">-->
-    <!--<file:matcher filenamePattern="*[1-2]*.html" />-->
-    <!--</file:list>-->
-    <!--</flow>-->
-
-    <!--<flow name="listWithGlobalMatcher">-->
-    <!--<file:list directoryPath="#[path]" recursive="#[recursive]" matcher="globalMatcher"/>-->
-    <!--</flow>-->
+    <flow name="listenTxtOnly">
+        <file:directory-listener directory="withMatcher" recursive="true">
+            <file:matcher filenamePattern="matchme.txt" />
+        </file:directory-listener>
+        <set-payload value="Dr. Manhattan" />
+        <flow-ref name="onEvent"/>
+    </flow>
 
     <sub-flow name="onEvent">
-        <expression-component>org.mule.extension.file.DirectoryListenerTestCase.onMessage(message)
-        </expression-component>
+        <expression-component>org.mule.extension.file.DirectoryListenerTestCase.onMessage(message)</expression-component>
     </sub-flow>
 </mule>

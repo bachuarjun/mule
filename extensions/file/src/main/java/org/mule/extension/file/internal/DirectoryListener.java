@@ -21,8 +21,8 @@ import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessa
 import static org.mule.runtime.core.util.concurrent.ThreadNameHelper.getPrefix;
 import org.mule.extension.file.api.DeletedFileAttributes;
 import org.mule.extension.file.api.FileConnector;
-import org.mule.extension.file.api.FileInputStream;
 import org.mule.extension.file.api.FileEventType;
+import org.mule.extension.file.api.FileInputStream;
 import org.mule.extension.file.api.ListenerFileAttributes;
 import org.mule.runtime.api.message.NullPayload;
 import org.mule.runtime.api.metadata.DataType;
@@ -145,6 +145,11 @@ public class DirectoryListener extends Source<InputStream, ListenerFileAttribute
         {
             for (; ; )
             {
+                if (isRequestedToStop())
+                {
+                    return;
+                }
+
                 WatchKey key;
                 try
                 {
@@ -283,6 +288,8 @@ public class DirectoryListener extends Source<InputStream, ListenerFileAttribute
                 LOGGER.warn("Found exception trying to close watcher service for directory listener on flow " + flowConstruct.getName(), e);
             }
         }
+
+        keyPaths.clear();
     }
 
     private void resetWatchKey(WatchKey key)
