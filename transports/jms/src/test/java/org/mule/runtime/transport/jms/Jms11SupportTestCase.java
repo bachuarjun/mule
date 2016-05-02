@@ -12,8 +12,7 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.mule.runtime.transport.jms.Jms11Support;
-import org.mule.runtime.transport.jms.JmsConnector;
+import org.mule.tck.MuleEndpointTestUtils;
 import org.mule.tck.junit4.AbstractMuleContextTestCase;
 
 import javax.jms.JMSException;
@@ -34,7 +33,7 @@ public class Jms11SupportTestCase extends AbstractMuleContextTestCase
         boolean noLocal = true;
         Session session = mock(Session.class);
 
-        jmsSupport.createConsumer(session, topic, null, noLocal, durableName, true, getTestInboundEndpoint("test"));
+        jmsSupport.createConsumer(session, topic, null, noLocal, durableName, true, MuleEndpointTestUtils.getTestInboundEndpoint("test", muleContext));
         verify(session).createDurableSubscriber(eq(topic), eq(durableName), isNull(String.class), eq(true));
     }
 
@@ -46,7 +45,7 @@ public class Jms11SupportTestCase extends AbstractMuleContextTestCase
         boolean noLocal = true;
         Session session = mock(Session.class);
 
-        jmsSupport.createConsumer(session, topic, null, noLocal, null, true, getTestInboundEndpoint("test"));
+        jmsSupport.createConsumer(session, topic, null, noLocal, null, true, MuleEndpointTestUtils.getTestInboundEndpoint("test", muleContext));
         verify(session).createConsumer(eq(topic), isNull(String.class), eq(true));
     }
 
@@ -58,7 +57,7 @@ public class Jms11SupportTestCase extends AbstractMuleContextTestCase
         boolean noLocal = true;
         Session session = mock(Session.class);
 
-        jmsSupport.createConsumer(session, queue, null, noLocal, null, false, getTestInboundEndpoint("test"));
+        jmsSupport.createConsumer(session, queue, null, noLocal, null, false, MuleEndpointTestUtils.getTestInboundEndpoint("test", muleContext));
         verify(session).createConsumer(eq(queue), isNull(String.class));
     }
 
@@ -73,7 +72,7 @@ public class Jms11SupportTestCase extends AbstractMuleContextTestCase
 
         try
         {
-            jmsSupport.createConsumer(session, queue, null, noLocal, durableName, false, getTestInboundEndpoint("test"));
+            jmsSupport.createConsumer(session, queue, null, noLocal, durableName, false, MuleEndpointTestUtils.getTestInboundEndpoint("test", muleContext));
         }
         catch (JMSException jmsex)
         {

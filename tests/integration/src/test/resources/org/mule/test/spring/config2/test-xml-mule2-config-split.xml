@@ -15,20 +15,10 @@
                                                  poolExhaustedAction="DISCARD" />
 
         <mule:flow name="appleComponent2" processingStrategy="customStrategy">
-            <mule:composite-source>
-                <mule:inbound-endpoint name="nonTransactedInboundEndpoint" address="test://endpoint.in3"
-                                  exchange-pattern="one-way"/>
-                <mule:inbound-endpoint name="transactedInboundEndpoint" address="test://endpoint.in2"
-                                  exchange-pattern="one-way">
-                    <mule:property key="testEndpointProperty" value="Prop1"/>
-                </mule:inbound-endpoint>
-            </mule:composite-source>
             <mule:pooled-component class="org.mule.tck.testmodels.fruit.Apple">
                 <mule:pooling-profile maxActive="9" maxIdle="6" maxWait="4002"
                                  exhaustedAction="WHEN_EXHAUSTED_FAIL" initialisationPolicy="INITIALISE_ALL"/>
             </mule:pooled-component>
-            <mule:outbound-endpoint name="transactedOutboundEndpoint" address="test://endpoint.out"
-                               exchange-pattern="one-way"/>
         </mule:flow>
     </mule:mule>
 </beans>

@@ -21,4 +21,9 @@ public interface MessageSource
      * when a message is received or generated.
      */
     void setListener(MessageProcessor listener);
+
+    default boolean isCompatibleWithAsync()
+    {
+        return true;
+    }
 }

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.mulesoft.org/schema/mule/parsers-test"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:mule="http://www.mulesoft.org/schema/mule/core"
+            xmlns:spring="http://www.springframework.org/schema/beans"
+            targetNamespace="http://www.mulesoft.org/schema/mule/transports-parsers-test"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.mulesoft.org/schema/mule/core"
+                schemaLocation="http://www.mulesoft.org/schema/mule/core/3.8/mule.xsd" />
+    <xsd:import namespace="http://www.springframework.org/schema/beans"
+                schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"/>
+
+    <xsd:element name="orphan-endpoint" type="stringEndpointType" substitutionGroup="mule:abstract-global-endpoint"/>
+    <xsd:complexType name="stringEndpointType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractGlobalEndpointType">
+                <xsd:group ref="mule:defaultEndpointElements"/>
+                <xsd:attributeGroup ref="mule:defaultEndpointAttributes"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:element name="child-endpoint" type="childEndpointType" substitutionGroup="mule:abstract-inbound-endpoint"/>
+    <xsd:complexType name="childEndpointType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractInboundEndpointType">
+                <xsd:group ref="mule:defaultEndpointElements"/>
+                <xsd:attributeGroup ref="mule:allExchangePatterns"/>
+                <xsd:attributeGroup ref="mule:defaultEndpointAttributes"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:element name="addressed-orphan-endpoint" type="addressedEndpointType" substitutionGroup="mule:abstract-global-endpoint"/>
+    <xsd:complexType name="addressedEndpointType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractGlobalEndpointType">
+                <xsd:group ref="mule:defaultEndpointElements"/>
+                <xsd:attribute name="path" type="xsd:string"/>
+                <xsd:attributeGroup ref="mule:restrictedEndpointAttributes"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:element name="addressed-child-endpoint" type="inboundEndpointType" substitutionGroup="mule:abstract-inbound-endpoint"/>
+    <xsd:complexType name="inboundEndpointType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractInboundEndpointType">
+                <xsd:group ref="mule:defaultEndpointElements"/>
+                <xsd:attribute name="address" type="xsd:string"/>
+                <xsd:attribute name="ref" type="xsd:string"/>
+                <xsd:attributeGroup ref="mule:allExchangePatterns"/>
+                <xsd:attributeGroup ref="mule:restrictedEndpointAttributes"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:element name="unaddressed-endpoint" type="unaddressedEndpointType" substitutionGroup="mule:abstract-global-endpoint"/>
+    <xsd:element name="unaddressed-orphan-endpoint" type="unaddressedEndpointType" substitutionGroup="mule:abstract-global-endpoint"/>
+    <xsd:complexType name="unaddressedEndpointType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractGlobalEndpointType">
+                <xsd:sequence>
+                    <xsd:element name="address">
+                        <xsd:complexType>
+                            <xsd:attribute name="address" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:group ref="mule:defaultEndpointElements"/>
+                </xsd:sequence>
+                <xsd:attributeGroup ref="mule:restrictedEndpointAttributes"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- this combines standard global endpoint elements, address-specific attributes, and
+          transport-specific attributes -->
+    <xsd:element name="complex-endpoint" type="complexEndpointType" substitutionGroup="mule:abstract-global-endpoint"/>
+    <xsd:complexType name="complexEndpointType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractGlobalEndpointType">
+                <!-- standard endpoint elements -->
+                <xsd:group ref="mule:defaultEndpointElements"/>
+                <!-- standard endpoint attributes -->
+                <xsd:attribute name="path" type="xsd:string"/>
+                <xsd:attributeGroup ref="mule:restrictedEndpointAttributes"/>
+                <!-- these are for child bean and will be set as properties
+                     - they could be any transport related values -->
+                <xsd:attribute name="string" type="xsd:string"/>
+                <xsd:attribute name="bar" type="xsd:int"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+</xsd:schema>

@@ -19,7 +19,7 @@ import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.client.MuleClient;
 import org.mule.runtime.core.api.context.notification.ExceptionNotificationListener;
-import org.mule.runtime.core.api.exception.MessageRedeliveredException;
+import org.mule.runtime.core.api.exception.EndpointMessageRedeliveredException;
 import org.mule.runtime.core.context.notification.ExceptionNotification;
 import org.mule.runtime.core.context.notification.NotificationException;
 import org.mule.runtime.core.message.ExceptionMessage;
@@ -69,7 +69,7 @@ public abstract class AbstractJmsRedeliveryTestCase extends FunctionalTestCase
         assertTrue(dl.getPayload() instanceof ExceptionMessage);
         ExceptionMessage em = (ExceptionMessage) dl.getPayload();
         assertNotNull(em.getException());
-        assertTrue(em.getException() instanceof MessageRedeliveredException);
+        assertTrue(em.getException() instanceof EndpointMessageRedeliveredException);
     }
 
     protected void assertMessageInDlqRollbackEs() throws Exception
@@ -120,7 +120,7 @@ public abstract class AbstractJmsRedeliveryTestCase extends FunctionalTestCase
             @Override
             public void onNotification(ExceptionNotification notification)
             {
-                if (notification.getException() instanceof MessageRedeliveredException)
+                if (notification.getException() instanceof EndpointMessageRedeliveredException)
                 {
                     messageRedeliveryExceptionFired.countDown();
                 }

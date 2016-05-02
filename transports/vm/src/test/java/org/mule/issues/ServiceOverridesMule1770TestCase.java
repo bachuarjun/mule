@@ -9,6 +9,7 @@ package org.mule.issues;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mule.runtime.core.registry.MuleRegistryTransportHelper.lookupConnector;
 
 import org.mule.functional.junit4.FunctionalTestCase;
 import org.mule.functional.transformer.NoActionTransformer;
@@ -31,7 +32,7 @@ public class ServiceOverridesMule1770TestCase extends FunctionalTestCase
     @Test
     public void testServiceOverrides()
     {
-        AbstractConnector c = (AbstractConnector)muleContext.getRegistry().lookupConnector("test");
+        AbstractConnector c = (AbstractConnector) lookupConnector(muleContext.getRegistry(), "test");
         assertNotNull("Connector should not be null", c);
         assertNotNull("Service overrides should not be null", c.getServiceOverrides());
         String temp =  (String)c.getServiceOverrides().get(MuleProperties.CONNECTOR_DISPATCHER_FACTORY);
@@ -46,13 +47,13 @@ public class ServiceOverridesMule1770TestCase extends FunctionalTestCase
     @Test
     public void testDuplicate()
     {
-        AbstractConnector c1 = (AbstractConnector)muleContext.getRegistry().lookupConnector("test");
+        AbstractConnector c1 = (AbstractConnector) lookupConnector(muleContext.getRegistry(), "test");
         assertNotNull("Connector should not be null", c1);
         Transformer t1 = TransformerUtils.firstOrNull(c1.getDefaultInboundTransformers(null));
         assertNotNull("InboundTransformer should not be null", t1);
         assertEquals(NoActionTransformer.class, t1.getClass());
 
-        AbstractConnector c2 = (AbstractConnector)muleContext.getRegistry().lookupConnector("second");
+        AbstractConnector c2 = (AbstractConnector) lookupConnector(muleContext.getRegistry(), "second");
         assertNotNull("Connector should not be null", c2);
         Transformer t2 = TransformerUtils.firstOrNull(c2.getDefaultInboundTransformers(null));
         assertNull("InboundTransformer should be null", t2);

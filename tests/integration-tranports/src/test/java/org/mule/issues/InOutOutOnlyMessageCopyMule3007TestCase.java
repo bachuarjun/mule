@@ -14,9 +14,11 @@ import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.client.MuleClient;
 import org.mule.tck.junit4.rule.DynamicPort;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
+@Ignore("MULE-9630")
 public class InOutOutOnlyMessageCopyMule3007TestCase extends FunctionalTestCase
 {
     @Rule
