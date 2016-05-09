@@ -149,16 +149,24 @@ public abstract class ExtensionComponent implements MuleContextAware, MetadataAw
 
     private MetadataContext getMetadataContext() throws MetadataResolvingException
     {
-        //TODO MULE-9530: Improve Config retrieval for Metadata resolution
-        if (!StringUtils.isBlank(configurationProviderName) &&
-            muleContext.getRegistry().get(configurationProviderName) instanceof DynamicConfigurationProvider)
+        ConfigurationInstance<Object> configuration;
+        Optional<ConfigurationProvider<Object>> provider = getConfigurationProvider();
+        if (provider.isPresent())
         {
-            throw new MetadataResolvingException("Configuration used for Metadata fetch cannot be dynamic", FailureCode.INVALID_CONFIGURATION);
+            ConfigurationProvider<Object> configurationProvider = provider.get();
+            if (configurationProvider instanceof DynamicConfigurationProvider)
+            {
+                throw new MetadataResolvingException("Configuration used for Metadata fetch cannot be dynamic", FailureCode.INVALID_CONFIGURATION);
+            }
+
+            configuration = configurationProvider.get(getInitialiserEvent(muleContext));
+        }
+        else
+        {
+            configuration = extensionManager.getConfiguration(extensionModel, getInitialiserEvent(muleContext));
         }
 
-        ConfigurationInstance<Object> configuration = getConfiguration(getInitialiserEvent(muleContext));
         String cacheId = configuration.getName();
-
         return new DefaultMetadataContext(configuration, connectionManager, metadataManager.getMetadataCache(cacheId));
     }
 
@@ -170,21 +178,13 @@ public abstract class ExtensionComponent implements MuleContextAware, MetadataAw
     {
         return getConfigurationProvider()
                 .map(provider -> provider.get(event))
-                .orElseGet(() -> {
-                    if (StringUtils.isBlank(configurationProviderName))
-                    {
-                        return extensionManager.getConfiguration(extensionModel, event);
-                    }
-                    return extensionManager.getConfiguration(configurationProviderName, event);
-                });
+                .orElseGet(() -> extensionManager.getConfiguration(extensionModel, event));
     }
 
     private Optional<ConfigurationProvider<Object>> getConfigurationProvider()
     {
-        Optional<ConfigurationProvider<Object>> provider = StringUtils.isBlank(configurationProviderName)
-                                                           ? extensionManager.getConfigurationProvider(extensionModel)
-                                                           : extensionManager.getConfigurationProvider(configurationProviderName);
-        return provider;
+        return StringUtils.isBlank(configurationProviderName) ? extensionManager.getConfigurationProvider(extensionModel)
+                                                              : extensionManager.getConfigurationProvider(configurationProviderName);
     }
 
 }

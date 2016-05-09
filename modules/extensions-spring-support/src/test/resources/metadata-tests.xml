@@ -13,6 +13,10 @@
         <metadata:connection/>
     </metadata:config>
 
+    <metadata:config name="dynamic-config" data="#['dynamic']">
+        <metadata:connection/>
+    </metadata:config>
+
     <flow name="contentMetadataWithKeyId">
         <metadata:content-metadata-with-key-id config-ref="config" type="Person"/>
     </flow>
@@ -129,4 +133,9 @@
                                                        rectangle="#[new org.mule.test.metadata.extension.model.shapes.Rectangle()]"
                                                        animal="#[new org.mule.test.metadata.extension.model.animals.Bear()"/>
     </flow>
+
+    <flow name="resolverWithDynamicConfig">
+        <metadata:simple-multi-level-key-resolver config-ref="dynamic-config" continent="AMERICA" country="USA" city="SFO"/>
+    </flow>
+
 </mule>
