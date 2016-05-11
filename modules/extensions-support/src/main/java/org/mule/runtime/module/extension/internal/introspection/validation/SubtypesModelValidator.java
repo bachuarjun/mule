@@ -11,11 +11,13 @@ import static org.mule.metadata.java.utils.JavaTypeUtils.getType;
 import static org.mule.runtime.module.extension.internal.util.NameUtils.getTopLevelTypeName;
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.metadata.java.utils.JavaTypeUtils;
+import org.mule.runtime.core.util.StringUtils;
 import org.mule.runtime.extension.api.exception.IllegalModelDefinitionException;
 import org.mule.runtime.extension.api.introspection.ExtensionModel;
 import org.mule.runtime.extension.api.introspection.property.ImportedTypesModelProperty;
 import org.mule.runtime.extension.api.introspection.property.SubTypesModelProperty;
 import org.mule.runtime.module.extension.internal.util.IntrospectionUtils;
+import org.mule.runtime.module.extension.internal.util.NameUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -117,5 +119,4 @@ public final class SubtypesModelValidator implements ModelValidator
             }
         }
     }
-
 }

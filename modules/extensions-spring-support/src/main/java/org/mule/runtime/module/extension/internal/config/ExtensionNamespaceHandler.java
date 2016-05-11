@@ -150,6 +150,7 @@ public class ExtensionNamespaceHandler extends NamespaceHandlerSupport
     {
         extensionModel.getConfigurationModels().forEach(configurationModel -> registerTopLevelParameter(extensionModel, configurationModel.getParameterModels()));
         extensionModel.getOperationModels().forEach(operationModel -> registerTopLevelParameter(extensionModel, operationModel.getParameterModels()));
+        extensionModel.getConfigurationModels().forEach(configurationModel -> configurationModel.getOperationModels().forEach(op -> registerTopLevelParameter(extensionModel, op.getParameterModels())));
     }
 
     private void registerTopLevelParameter(final ExtensionModel extensionModel, final MetadataType parameterType)

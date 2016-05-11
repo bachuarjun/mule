@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+       http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/sockets/current/mule-sockets.xsd">
+
+    <sockets:requester-config name="tcp-requester">
+        <sockets:tcp-requester-connection host="localhost" port="8006">
+            <sockets:protocol>
+                <sockets:length-protocol/>
+            </sockets:protocol>
+            <sockets:tcp-client-socket-properties>
+                <sockets:default-tcp-client-socket-properties failOnUnresolvedHost="true" sendTcpNoDelay="true"/>
+            </sockets:tcp-client-socket-properties>
+        </sockets:tcp-requester-connection>
+    </sockets:requester-config>
+
+    <sockets:listener-config name="tcp-listener">
+        <sockets:tcp-listener-connection host="localhost" port="8006">
+            <sockets:protocol>
+                <sockets:length-protocol rethrowExceptionOnRead="true"/>
+            </sockets:protocol>
+            <sockets:tcp-server-socket-properties>
+                <sockets:default-tcp-server-socket-properties/>
+            </sockets:tcp-server-socket-properties>
+        </sockets:tcp-listener-connection>
+    </sockets:listener-config>
+
+
+    <sockets:requester-config name="udp-requester">
+        <sockets:udp-requester-connection host="localhost" port="8007">
+            <sockets:udp-socket-properties>
+                <sockets:default-udp-socket-properties broadcast="false"/>
+            </sockets:udp-socket-properties>
+        </sockets:udp-requester-connection>
+    </sockets:requester-config>
+
+    <sockets:listener-config name="udp-listener">
+        <sockets:udp-listener-connection host="localhost" port="8007">
+            <sockets:udp-socket-properties>
+                <sockets:default-udp-socket-properties broadcast="false"/>
+            </sockets:udp-socket-properties>
+        </sockets:udp-listener-connection>
+    </sockets:listener-config>
+
+    <flow name="tcp-write">
+        <sockets:write config-ref="tcp-requester"/>
+    </flow>
+
+
+    <flow name="tcp-listen">
+        <sockets:tcp-listener config-ref="tcp-listener"/>
+        <flow-ref name="onIncomingConnection"/>
+    </flow>
+
+    <flow name="udp-write">
+        <sockets:write config-ref="udp-requester"/>
+    </flow>
+
+    <flow name="udp-listen">
+        <sockets:udp-listener config-ref="udp-listener"/>
+        <flow-ref name="onIncomingConnection"/>
+    </flow>
+
+    <sub-flow name="onIncomingConnection">
+        <expression-component>org.mule.extension.socket.TcpWriteTestCase.onIncomingConnection(message)
+        </expression-component>
+    </sub-flow>
+
+</mule>
